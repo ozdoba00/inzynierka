@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginPostRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,7 @@ class AuthController extends Controller
      */
     public function createUser(Request $request)
     {
+
         try {
             //Validated
             $validateUser = Validator::make($request->all(),
@@ -60,22 +62,9 @@ class AuthController extends Controller
      * @param Request $request
      * @return User
      */
-    public function loginUser(Request $request)
+    public function loginUser(LoginPostRequest $request)
     {
         try {
-            $validateUser = Validator::make($request->all(),
-            [
-                'email' => 'required|email',
-                'password' => 'required'
-            ]);
-
-            if($validateUser->fails()){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
-            }
 
             if(!Auth::attempt($request->only(['email', 'password']))){
                 return response()->json([
@@ -103,6 +92,6 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-    return $request->user();
+        return $request->user();
     }
 }
