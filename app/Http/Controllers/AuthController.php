@@ -22,14 +22,16 @@ class AuthController extends Controller
 
         try {
             //Validated
-            $validateUser = Validator::make($request->all(),
-            [
-                'name' => 'required',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required'
-            ]);
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required'
+                ]
+            );
 
-            if($validateUser->fails()){
+            if ($validateUser->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'validation error',
@@ -48,7 +50,6 @@ class AuthController extends Controller
                 'message' => 'User Created Successfully',
                 'token' => $user->createToken("API TOKEN")->plainTextToken
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -66,7 +67,7 @@ class AuthController extends Controller
     {
         try {
 
-            if(!Auth::attempt($request->only(['email', 'password']))){
+            if (!Auth::attempt($request->only(['email', 'password']))) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Email & Password does not match with our record.',
@@ -75,13 +76,21 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User Logged In Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken,
-                'email_verified' => $user->email_verified_at
-            ], 200);
-
+            if ($user->email_verified_at) 
+            {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'User Logged In Successfully',
+                    'token' => $user->createToken("API TOKEN")->plainTextToken,
+                    'email_verified' => $user->email_verified_at
+                ], 200);
+            }
+            else
+            {
+                return response()->json([
+                    'message' => 'User is not verified',
+                ], 401);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
