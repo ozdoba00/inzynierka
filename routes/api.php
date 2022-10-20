@@ -21,7 +21,5 @@ Route::post('/auth/login', [AuthController::class, 'loginUser']);
 Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
 Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify')->middleware('auth:sanctum');
 
-
-
-
 Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum', 'verified');
+Route::put('/profile/edit', [AuthController::class, 'editProfile'])->middleware('auth:sanctum', 'verified');

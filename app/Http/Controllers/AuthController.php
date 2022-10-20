@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EditProfileRequest;
 use App\Http\Requests\LoginPostRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -102,5 +103,30 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         return $request->user();
+    }
+
+    public function editProfile(EditProfileRequest $request)
+    {
+
+        try {
+            
+
+            $user = User::findOrFail(Auth::user()->id);
+            $user = $user->update([
+                'name' => $request->name,
+                'last_name' => $request->lastName,
+                'gender' => $request->gender,
+                'date_of_birth' => $request->birthDate,
+                'profile_image' => $request->avatar
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Zadanie zostalo zaktualizowane!',
+                'data' => $user
+            ], 200);
+        } catch (\Throwable $th) {
+            return ['error' => 'errr'];
+        }
     }
 }
