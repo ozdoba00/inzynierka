@@ -17,6 +17,17 @@ class OfferController extends Controller
     public function index(Offer $offer)
     {
         $offers = $offer->with('user')->get();
+
+        foreach ($offers as $key => $offerData) {
+
+            // return ['user'=> Auth::user()->id];
+            if ($offerData['user']['id'] == Auth::user()->id) {
+                $offers[$key]['editable'] = true;
+            } else {
+                $offers[$key]['editable'] = false;
+            }
+            
+        }
         
         return ['offers'=>$offers];
     }
