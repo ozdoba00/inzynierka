@@ -16,7 +16,7 @@ class OfferController extends Controller
      */
     public function index(Offer $offer)
     {
-        $offers = $offer->with('user')->get();
+        $offers = $offer->with('user')->orderBy('updated_at', 'DESC')->get();
 
         foreach ($offers as $key => $offerData) {
 
@@ -26,9 +26,9 @@ class OfferController extends Controller
             } else {
                 $offers[$key]['editable'] = false;
             }
-            
+
         }
-        
+
         return ['offers'=>$offers];
     }
 
@@ -51,7 +51,7 @@ class OfferController extends Controller
     public function store(OfferRequest $request, Offer $offer)
     {
         $offerData = $request->all();
-        
+
         Offer::create([
             'content' => request('content'),
             'price' => request('price'),
@@ -102,6 +102,17 @@ class OfferController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $offer = Offer::find($id);
+        if($offer->user_id == Auth::user()->id)
+        {
+            $offer->delete();
+            return ['message'=> 'Offer removed successfully'];
+        }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
     }
 }

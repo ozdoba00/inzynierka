@@ -19,12 +19,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail']);
     Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify']);
-    
+
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::put('/profile/edit', [AuthController::class, 'editProfile']);
 
     Route::get('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
+    Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
 
 });
 

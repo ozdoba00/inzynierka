@@ -77,7 +77,7 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            if ($user->email_verified_at) 
+            if ($user->email_verified_at)
             {
                 return response()->json([
                     'status' => true,
@@ -108,8 +108,9 @@ class AuthController extends Controller
     public function editProfile(EditProfileRequest $request)
     {
 
+
         try {
-            
+
 
             $user = User::findOrFail(Auth::user()->id);
             $user = $user->update([
@@ -117,7 +118,7 @@ class AuthController extends Controller
                 'last_name' => $request->lastName,
                 'gender' => $request->gender,
                 'date_of_birth' => $request->birthDate,
-                'profile_image' => $request->avatar
+
             ]);
 
             return response()->json([
