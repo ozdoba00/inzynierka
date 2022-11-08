@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\HomeInformationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +27,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
     Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
+
+    Route::get('/home-information', [HomeInformationController::class, 'index']);
 
 });
 
