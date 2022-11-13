@@ -28,7 +28,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/offers/add', [OfferController::class, 'store']);
     Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
 
-    Route::get('/home-information', [HomeInformationController::class, 'index']);
+    Route::get('/posts', [HomeInformationController::class, 'index']);
 
 });
 

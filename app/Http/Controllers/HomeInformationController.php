@@ -12,10 +12,22 @@ class HomeInformationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(HomeInformation $homeInformation)
+    public function index(HomeInformation $homeInformation, Request $request)
     {
-        $result = $homeInformation->all();
-        return ['home'=>$result];
+        $preparedFilters = [];
+        if(!empty($request->filters))
+        {
+            $filters = $request->filters;
+            
+            foreach ($filters as $key => $value) 
+            {
+                $preparedFilters[] = [$key, '=', $value];
+            }
+        }
+        
+        $posts = $homeInformation->with('user')->where($preparedFilters)->get();
+      
+        return ['posts'=>$posts];
     }
 
     /**
