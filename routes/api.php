@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\HomeInformationController;
+use App\Http\Controllers\ICalController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,7 +23,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify']);
 
     Route::get('/profile', [AuthController::class, 'profile']);
-    Route::put('/profile/edit', [AuthController::class, 'editProfile']);
+    Route::post('/profile/edit', [AuthController::class, 'editProfile']);
 
     Route::get('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
@@ -30,9 +31,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/posts', [HomeInformationController::class, 'index']);
 
+    Route::get("/ical-events", [ICalController::class, 'getEventsICalObject']);
+
+    
+
+
 });
 
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
-
-
+Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);

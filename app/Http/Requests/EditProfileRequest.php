@@ -27,7 +27,8 @@ class EditProfileRequest extends FormRequest
             'name' => 'required',
             'lastName' => 'required',
             'gender' => 'required',
-            'birthDate' => 'required'
+            'birthDate' => 'required',
+            'avatar' => 'required'
         ];
     }
 }

@@ -107,17 +107,26 @@ class AuthController extends Controller
 
     public function editProfile(EditProfileRequest $request)
     {
-
-
         try {
-
-
+          
+            $filenameWithExt = $request->file('avatar')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+    
+            
+            // Get just ext
+            $extension = $request->file('avatar')->getClientOriginalExtension();
+            // Filename to store
+            $fileNameToStore = $filename.'_'.time().'.'.$extension;
+            // Upload Image
             $user = User::findOrFail(Auth::user()->id);
+            $request->file('avatar')->storeAs('public/avatars',$fileNameToStore);
+
             $user = $user->update([
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'gender' => $request->gender,
                 'date_of_birth' => $request->birthDate,
+                'profile_image' => $fileNameToStore
 
             ]);
 
