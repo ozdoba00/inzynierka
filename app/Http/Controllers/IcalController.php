@@ -11,7 +11,7 @@ use Illuminate\Http\UploadedFile;
 
 class ICalController extends Controller
 {
-  
+
    /**
     * Gets the events data from the database
     * and populates the iCal object.
@@ -24,9 +24,7 @@ class ICalController extends Controller
     $ical = new iCalEasyReader();
     $file = File::get(storage_path('framework/testing/example2.ics'));
     $lines = $ical->load( $file);
-    dump($lines);
 
-    die;
        $events = TechEvents::all();
        define('ICAL_FORMAT', 'Ymd\THis\Z');
 
@@ -34,7 +32,7 @@ class ICalController extends Controller
        VERSION:2.0
        METHOD:PUBLISH
        PRODID:-//Charles Oduk//Tech Events//EN\n";
-      
+
        // loop over events
        foreach ($events as $event) {
            $icalObject .=
@@ -56,9 +54,9 @@ class ICalController extends Controller
        // Set the headers
        header('Content-type: text/calendar; charset=utf-8');
        header('Content-Disposition: attachment; filename="cal.ics"');
-      
+
        $icalObject = str_replace(' ', '', $icalObject);
-  
+
        echo $icalObject;
    }
 

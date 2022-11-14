@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditProfileRequest;
 use App\Http\Requests\LoginPostRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -102,31 +103,32 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return $request->user();
+        // return $request->user();
+        return new UserResource($request->user());
     }
 
     public function editProfile(EditProfileRequest $request)
     {
         try {
-          
+
             $filenameWithExt = $request->file('avatar')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-    
-            
+
+
             // Get just ext
             $extension = $request->file('avatar')->getClientOriginalExtension();
             // Filename to store
             $fileNameToStore = $filename.'_'.time().'.'.$extension;
             // Upload Image
             $user = User::findOrFail(Auth::user()->id);
-            $request->file('avatar')->storeAs('public/avatars',$fileNameToStore);
+            $imgPath = $request->file('avatar')->storeAs('avatars/',$fileNameToStore);
 
             $user = $user->update([
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'gender' => $request->gender,
                 'date_of_birth' => $request->birthDate,
-                'profile_image' => $fileNameToStore
+                'profile_image' => $imgPath
 
             ]);
 

@@ -18,4 +18,8 @@ class Offer extends Model
     {
         return $this-> belongsTo('App\Models\User');
     }
+
+    protected $casts = [
+        'updated_at' => 'datetime:Y-m-d H:00',
+    ];
 }
