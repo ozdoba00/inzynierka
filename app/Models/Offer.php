@@ -20,6 +20,6 @@ class Offer extends Model
     }
 
     protected $casts = [
-        'updated_at' => 'datetime:Y-m-d H:00',
+        'updated_at' => 'datetime:Y-m-d H:i:00 ',
     ];
 }

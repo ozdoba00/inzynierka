@@ -118,9 +118,10 @@ class AuthController extends Controller
             // Get just ext
             $extension = $request->file('avatar')->getClientOriginalExtension();
             // Filename to store
-            $fileNameToStore = $filename.'_'.time().'.'.$extension;
+            
             // Upload Image
             $user = User::findOrFail(Auth::user()->id);
+            $fileNameToStore = $filename.'_'. $user->id . '.'. $extension;
             $imgPath = $request->file('avatar')->storeAs('avatars/',$fileNameToStore);
 
             $user = $user->update([
