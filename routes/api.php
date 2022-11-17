@@ -32,6 +32,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/posts', [HomeInformationController::class, 'index']);
 
     Route::get("/ical-events", [ICalController::class, 'getEventsICalObject']);
+    Route::post('/ical-events/add', [ICalController::class, 'store']);
+    Route::post('/ical-events/get', [ICalController::class, 'index']);
+
 
     
 
