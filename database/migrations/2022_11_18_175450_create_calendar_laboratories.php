@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCalendarsLectures extends Migration
+class CreateCalendarLaboratories extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateCalendarsLectures extends Migration
      */
     public function up()
     {
-        Schema::create('calendars_lectures', function (Blueprint $table) {
+        Schema::create('calendar_laboratories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('calendar_id');
-            $table->unsignedBigInteger("lecture_id");
-            $table->foreign('calendar_id')->references('id')->on('calendars')->onDelete('cascade');
-            $table->foreign('lecture_id')->references('id')->on('lecture_groups')->onDelete('cascade');
+            $table->unsignedBigInteger("laboratory_id");
+            $table->foreign('calendar_id')->references('id')->on('calendar')->onDelete('cascade');
+            $table->foreign('laboratory_id')->references('id')->on('laboratory_groups')->onDelete('cascade');
         });
     }
 
@@ -29,6 +29,6 @@ class CreateCalendarsLectures extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('calendars_lectures');
+        Schema::dropIfExists('calendars_laboratories');
     }
 }
