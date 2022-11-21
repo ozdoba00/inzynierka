@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class Calendar extends Model
 {
     use HasFactory;
-
+    public $table = 'calendar';
     /**
     * The attributes that are mass assignable.
     *
@@ -16,8 +16,8 @@ class Calendar extends Model
     */
    protected $fillable = [
     'name',
-    'starts',
     'ends',
+    'starts',
     'status',
     'summary',
     'location',
@@ -37,16 +37,14 @@ public static $rules = [
     'summary' => 'required',
 ];
 
-protected $casts = [
-    'starts' => 'datetime:Y-m-d',
-];
+
 
 
     public static function getPrivateEvents(int $userId)
     {
-        $events = DB::table('calendars_users')
-            ->join('calendars', 'calendars_users.calendar_id', '=', 'calendars.id')
-            ->select('calendars.*')
+        $events = DB::table('calendar_users')
+            ->join('calendar', 'calendar_users.calendar_id', '=', 'calendar.id')
+            ->select('calendar.*')
             ->where('user_id', $userId)
             ->get();
 
@@ -55,9 +53,9 @@ protected $casts = [
 
     public static function getLectureEvents(int $lectureId)
     {
-        $events = DB::table('calendars_lectures')
-            ->join('calendars', 'calendars_lectures.calendar_id', '=', 'calendars.id')
-            ->select('calendars.*')
+        $events = DB::table('calendar_lectures')
+            ->join('calendar', 'calendar_lectures.calendar_id', '=', 'calendar.id')
+            ->select('calendar.*')
             ->where('lecture_id', $lectureId)
             ->get();
 
@@ -66,9 +64,9 @@ protected $casts = [
 
     public static function getLaboratoryEvents(int $laboratoryId)
     {
-        $events = DB::table('calendars_laboratories')
-            ->join('calendars', 'calendars_laboratories.calendar_id', '=', 'calendars.id')
-            ->select('calendars.*')
+        $events = DB::table('calendar_laboratories')
+            ->join('calendar', 'calendar_laboratories.calendar_id', '=', 'calendar.id')
+            ->select('calendar.*')
             ->where('laboratory_id', $laboratoryId)
             ->get();
 
@@ -76,9 +74,9 @@ protected $casts = [
     }
     public static function getProjectEvents(int $projectId)
     {
-        $events = DB::table('calendars_projects')
-            ->join('calendars', 'calendars_projects.calendar_id', '=', 'calendars.id')
-            ->select('calendars.*')
+        $events = DB::table('calendar_projects')
+            ->join('calendar', 'calendar_projects.calendar_id', '=', 'calendar.id')
+            ->select('calendar.*')
             ->where('project_id', $projectId)
             ->get();
 
@@ -87,7 +85,7 @@ protected $casts = [
 
     public static function savePrivateEvents(Calendar $event)
     {   
-        DB::table('calendars_users')
+        DB::table('calendar_users')
         ->insert([
             'calendar_id' => $event->id,
             'user_id' => auth()->id()
@@ -95,7 +93,7 @@ protected $casts = [
     }
     public static function saveLectureEvents(Calendar $event, int $lectureId)
     {   
-        DB::table('calendars_lectures')
+        DB::table('calendar_lectures')
         ->insert([
             'calendar_id' => $event->id,
             'lecture_id' => $lectureId
@@ -103,7 +101,7 @@ protected $casts = [
     }
     public static function saveLaboratoryEvents(Calendar $event, int $laboratoryId)
     {   
-        DB::table('calendars_laboratories')
+        DB::table('calendar_laboratories')
         ->insert([
             'calendar_id' => $event->id,
             'laboratory_id' => $laboratoryId
@@ -111,7 +109,7 @@ protected $casts = [
     }
     public static function saveProjectEvents(Calendar $event, int $projectId)
     {   
-        DB::table('calendars_projects')
+        DB::table('calendar_projects')
         ->insert([
             'calendar_id' => $event->id,
             'project_id' => $projectId

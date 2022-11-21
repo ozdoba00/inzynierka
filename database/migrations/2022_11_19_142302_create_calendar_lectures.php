@@ -13,7 +13,7 @@ class CreateCalendarLectures extends Migration
      */
     public function up()
     {
-        Schema::create('calendars_lectures', function (Blueprint $table) {
+        Schema::create('calendar_lectures', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('calendar_id');
             $table->unsignedBigInteger("lecture_id");

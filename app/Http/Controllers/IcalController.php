@@ -6,8 +6,10 @@ use App\Models\Calendar;
 use Illuminate\Support\Facades\File;
 use App\Providers\iCalEasyReader;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 
 class ICalController extends Controller
 {
@@ -94,9 +96,9 @@ class ICalController extends Controller
 
         $data = $request->all();
 
+    
         $data['name'] = 'calendar';
         $data['status'] = 'test';
-
         try {
             $onSave = Calendar::create($data);
             if (!empty($data['groups'])) 
@@ -123,9 +125,44 @@ class ICalController extends Controller
             return ['error'=>$th];
         }
 
+        return ['status' => '200'];
+    }
 
+    public function update($id, Request $request)
+    {
 
-        return ['ok' => 'ok'];
+        try {
+            $calendarEvent = Calendar::findOrFail($id);
+            $calendarEvent = $calendarEvent->update([
+                'summary' => $request->summary,
+                'frequency' => $request->frequency,
+                'starts' => $request->starts
+    
+            ]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Wydarzenie zostalo zaktualizowane',
+                'data' => $calendarEvent
+            ], 200);
+        } catch (\Throwable $th) {
+            return ['error'=>$th];
+        }
+       
+      
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $event = Calendar::find($id);
+        
+            $event->delete();
+            return ['message' => 'Event removed successfully'];
+            
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function saveCalendarEvents(Calendar $calendar, Request $request)

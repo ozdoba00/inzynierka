@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
 {
@@ -29,7 +30,10 @@ class AuthController extends Controller
                 [
                     'name' => 'required',
                     'email' => 'required|email|unique:users,email',
-                    'password' => 'required'
+                    'password' => 'required',
+                    'last_name' => 'required',
+                    'gender' => 'required',
+                    'date_of_birth' => 'required'
                 ]
             );
 
@@ -44,7 +48,10 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password)
+                'password' => Hash::make($request->password),
+                'last_name' => $request->last_name,
+                'gender' => $request->gender,
+                'date_of_birth' => $request->date_of_birth
             ]);
 
             return response()->json([
@@ -109,26 +116,43 @@ class AuthController extends Controller
 
     public function editProfile(EditProfileRequest $request)
     {
+        
         try {
 
-            $filenameWithExt = $request->file('avatar')->getClientOriginalName();
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-
-            // Get just ext
-            $extension = $request->file('avatar')->getClientOriginalExtension();
-            // Filename to store
+            $imgPath = null;
+            $user = User::findOrFail(Auth::user()->id);
+            if(!empty($user->profile_image))
+            {
+                $imgPath = $user->profile_image;
+            }
+            if($request->file('avatar') !== null)
+            {
+                $filenameWithExt = $request->file('avatar')->getClientOriginalName();
+                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+    
+    
+                // Get just ext
+                $extension = $request->file('avatar')->getClientOriginalExtension();
+                // Filename to store
+                $fileNameToStore = $filename.'_'. $user->id . '.'. $extension;
+                $imgPath = $request->file('avatar')->storeAs('avatars/',$fileNameToStore);
+            }
+           
             
             // Upload Image
-            $user = User::findOrFail(Auth::user()->id);
-            $fileNameToStore = $filename.'_'. $user->id . '.'. $extension;
-            $imgPath = $request->file('avatar')->storeAs('avatars/',$fileNameToStore);
-
+            $birthDate = Carbon::parse($request->birthDate);
+            // return ['baza'=> $user->date_of_birth, 'req'=>$birthDate];
+            if(strcmp($birthDate, $user->date_of_birth))
+            {
+                $birthDate= $birthDate->addDays('1');
+            }
+            
+         
             $user = $user->update([
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'gender' => $request->gender,
-                'date_of_birth' => $request->birthDate,
+                'date_of_birth' => $birthDate,
                 'profile_image' => $imgPath
 
             ]);
@@ -139,7 +163,7 @@ class AuthController extends Controller
                 'data' => $user
             ], 200);
         } catch (\Throwable $th) {
-            return ['error' => 'errr'];
+            return ['error' => $th];
         }
     }
 }

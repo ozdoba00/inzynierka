@@ -7,6 +7,8 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\HomeInformationController;
 use App\Http\Controllers\ICalController;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -34,8 +36,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get("/ical-events", [ICalController::class, 'getEventsICalObject']);
     Route::post('/ical-events/add', [ICalController::class, 'store']);
     Route::post('/ical-events/get', [ICalController::class, 'index']);
-
-
+    Route::post('/ical-events/edit/{id}', [ICalController::class, 'update']);
+    Route::delete('/ical-events/remove/{id}', [ICalController::class, 'destroy']);
     
 
 
@@ -44,3 +46,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
 Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);
+Route::get('/auth/redirect', function () {
+    
+    return Socialite::driver('usos')->redirect();
+});

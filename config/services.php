@@ -30,4 +30,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'usos' => [
+        'client_id' => env('USOS_API_KEY'),
+        'client_secret' => env('USOS_API_KEY_SECRET'),
+        'redirect' => 'http://localhost:8080/',
+    ],
+
 ];
