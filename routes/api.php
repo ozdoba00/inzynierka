@@ -7,6 +7,7 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\HomeInformationController;
 use App\Http\Controllers\ICalController;
+use App\Http\Controllers\UsosController;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -46,7 +47,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
 Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);
-Route::get('/auth/redirect', function () {
-    
-    return Socialite::driver('usos')->redirect();
-});
+
+Route::get('/usos-data', [UsosController::class, 'index']);
+Route::get('/usos-submit', [UsosController::class, 'authorization']);
