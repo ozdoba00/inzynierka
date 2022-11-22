@@ -4,13 +4,14 @@ namespace App\Providers;
 
 class UsosProvider {
 
- 
+
     public $usos_base_url;
     public $usos_consumer_key;
     public $usos_consumer_secret_key;
     public $callback;
     public $scopes = array();
 
+    public $oauth;
     public $token_key;
     public $token_secret_key;
 
@@ -20,7 +21,7 @@ class UsosProvider {
         $this->usos_consumer_key = $consumer_key;
         $this->usos_consumer_secret_key = $consumer_secret_key;
         $this->callback = $callback;
-        
+
     }
 
     public function setScopes(array $scopes)
@@ -29,17 +30,14 @@ class UsosProvider {
     }
     public function setRequestToken()
     {
-        $oauth = new \OAuth($this->usos_consumer_key, $this->usos_consumer_secret_key, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
-        $oauth->disableSSLChecks();
-        $oauth->enableDebug();
+        $this->oauth = new \OAuth($this->usos_consumer_key, $this->usos_consumer_secret_key, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
+        $this->oauth->disableSSLChecks();
+        $this->oauth->enableDebug();
         $req_url = $this->usos_base_url . 'services/oauth/request_token?scopes='.implode('|', $this->scopes);
-        $request_token_info = $oauth->getRequestToken($req_url, $this->callback);
+        $request_token_info = $this->oauth->getRequestToken($req_url, $this->callback);
         $this->token_key = $request_token_info['oauth_token'];
         $this->token_secret_key = $request_token_info['oauth_token_secret'];
-        
-        // $oauth->setToken($this->token_key,$this->token_secret_key);
-        // $acc_url = $this->usos_base_url.'services/oauth/access_token';
-        // $access_token_info = $oauth->getAccessToken($acc_url);
+
     }
 
     public function getTokens()
@@ -54,6 +52,16 @@ class UsosProvider {
 
         return [$authurl.((strpos($authurl, '?') === false) ? '?' : '&').'oauth_token='.$this->token_key];
 
+    }
+
+
+    public function getAccessToken()
+    {
+        $this->oauth->setToken($this->token_key,$this->token_secret_key);
+        $acc_url = $this->usos_base_url.'services/oauth/access_token';
+        $access_token_info = $this->oauth->getAccessToken($acc_url);
+
+        return $access_token_info;
     }
 
 

@@ -49,4 +49,4 @@ Route::post('/auth/login', [AuthController::class, 'loginUser']);
 Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);
 
 Route::get('/usos-data', [UsosController::class, 'index']);
-Route::get('/usos-submit', [UsosController::class, 'authorization']);
+Route::post('/usos-submit', [UsosController::class, 'authorization']);

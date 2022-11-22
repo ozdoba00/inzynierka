@@ -11,7 +11,7 @@ class UsosController extends Controller
     {
         $usosProvider = new UsosProvider;
 
-        $usosProvider->setAuthorizationData('https://usosapps.prz.edu.pl/',  env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), 'http://localhost:8000/api/usos-submit');
+        $usosProvider->setAuthorizationData('https://usosapps.prz.edu.pl/',  env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), 'http://localhost:8081/usos-submit');
         $usosProvider->setScopes(array('studies'));
         $usosProvider->setRequestToken();
         $tokens = $usosProvider->getTokens();
@@ -22,13 +22,31 @@ class UsosController extends Controller
     }
 
 
-    public function authorization()
+    public function authorization(Request $request)
     {
-        $usosData = UsosData::where('oauth_token', 'LIKE', '%'.$_GET['oauth_token'].'%');
-        
-        $usosData = $usosData->update([
-            'oauth_verifier' => $_GET['oauth_verifier']
-        ]);
+
+        try {
+            $oauthToken = $request->oauth_token;
+            $oauthVerifier = $request->oauth_verifier;
+            $usosData = UsosData::where('oauth_token', 'LIKE', '%'.$oauthToken.'%');
+
+            if(!empty($usosData))
+            {
+                $usosData = $usosData->update([
+                    'oauth_verifier' => $oauthVerifier
+                ]);
+
+
+
+                // return ['message'=>'Usos data authorized successfully'];
+            }
+
+
+        } catch (\Throwable $th) {
+            return ['error' => $th];
+        }
+
+
 
     }
 }
