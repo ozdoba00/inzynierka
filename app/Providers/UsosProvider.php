@@ -35,8 +35,10 @@ class UsosProvider {
         $this->oauth->enableDebug();
         $req_url = $this->usos_base_url . 'services/oauth/request_token?scopes='.implode('|', $this->scopes);
         $request_token_info = $this->oauth->getRequestToken($req_url, $this->callback);
+        
         $this->token_key = $request_token_info['oauth_token'];
         $this->token_secret_key = $request_token_info['oauth_token_secret'];
+        return $request_token_info;
 
     }
 
@@ -46,20 +48,22 @@ class UsosProvider {
         return $tokens;
     }
 
-    public function getAuthorizeUrl()
+    public function getAuthorizeUrl($requestToken, $requestTokenSecret)
     {
         $authurl = $this->usos_base_url.'services/oauth/authorize';
 
-        return [$authurl.((strpos($authurl, '?') === false) ? '?' : '&').'oauth_token='.$this->token_key];
+        return [$authurl.((strpos($authurl, '?') === false) ? '?' : '&').'oauth_token='.$requestToken . '&oauth_token_secret='. $requestTokenSecret . '&oauth_callback_confirmed=true'];
 
     }
 
 
-    public function getAccessToken()
+    public function getAccessToken($url, $consumer_key, $consumer_secret_key, $oauthToken, $oauthSecretToken, $oauthVerifier)
     {
-        $this->oauth->setToken($this->token_key,$this->token_secret_key);
-        $acc_url = $this->usos_base_url.'services/oauth/access_token';
-        $access_token_info = $this->oauth->getAccessToken($acc_url);
+        $this->oauth = new \OAuth($consumer_key, $consumer_secret_key, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
+        $this->oauth->disableSSLChecks();
+        $this->oauth->setToken($oauthToken,$oauthSecretToken);
+        $acc_url = $url.'services/oauth/access_token';
+        $access_token_info = $this->oauth->getAccessToken($acc_url, '', $oauthVerifier);
 
         return $access_token_info;
     }

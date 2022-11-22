@@ -50,3 +50,4 @@ Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);
 
 Route::get('/usos-data', [UsosController::class, 'index']);
 Route::post('/usos-submit', [UsosController::class, 'authorization']);
+Route::post('/usos-access', [UsosController::class, 'accessToken']);
