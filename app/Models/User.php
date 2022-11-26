@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'last_name',
+        'email_verified_at',
         'gender',
         'date_of_birth',
         'profile_image'
@@ -56,5 +58,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function post()
     {
         return $this->hasOne('App\Models\HomeInformation');
+    }
+
+    public function studyFields()
+    {
+        return $this->belongsToMany('App\Models\FieldOfStudy', 'users_fields_of_study', 'user_id', 'study_field_id');
+    }
+
+    public static function getTokenById(int $tokenId)
+    {
+        $token = DB::table('personal_access_tokens')
+            ->select('*')
+            ->where('id', $tokenId)
+            ->first();
+        return $token;
+    }
+
+    public static function removeToken(int $tokenId)
+    {
+        DB::table('personal_access_tokens')
+        ->where('id', $tokenId)
+        ->delete();
     }
 }

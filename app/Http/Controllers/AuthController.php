@@ -8,6 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EditProfileRequest;
 use App\Http\Requests\LoginPostRequest;
 use App\Http\Resources\UserResource;
+use App\Providers\UsosProvider;
+use App\Models\UsosData;
+use App\Models\UsosDataUser;
+use App\Models\FieldOfStudy;
+
+use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -25,15 +31,12 @@ class AuthController extends Controller
 
         try {
             //Validated
+    
             $validateUser = Validator::make(
-                $request->all(),
+                $request->userData,
                 [
-                    'name' => 'required',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required',
-                    'last_name' => 'required',
-                    'gender' => 'required',
-                    'date_of_birth' => 'required'
                 ]
             );
 
@@ -45,20 +48,56 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'last_name' => $request->last_name,
-                'gender' => $request->gender,
-                'date_of_birth' => $request->date_of_birth
-            ]);
+            
+            $email = $request->userData['email'];
+            $oauthData = UsosData::where('oauth_verifier', $request->oauthVerifier)->first();
+            $usosApi = UsosProvider::setApiAuthorization($oauthData->oauth_token, $oauthData->oauth_token_secret);
+            $usosData = new UsosData();
+            $userData = $usosData->checkUserApiByEmail($usosApi, $email);
+    
+            if($userData)
+            {
+                $user = User::create([
+                    'email' => $userData['email'],
+                    'password' => Hash::make($request->password),
+                    'name' => $userData['first_name'],
+                    'last_name' => $userData['last_name'],
+                    'email_verified_at' => date('Y-m-d H:i:s'),
+                    'date_of_birth' => $userData['birth_date'],
+                    'gender' => $userData['sex']
+                ]);
+    
+              
+                UsosDataUser::create([
+                    'user_id' => $user->id,
+                    'usos_data_id' => $oauthData->id
+                ]);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User Created Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
+                if($userData['student_programmes'])
+                {
+                    foreach ($userData['student_programmes'] as $field) 
+                    {
+                        $studyField = FieldOfStudy::where('usos_id', $field->id)->first();
+                        if(empty($studyField))
+                        {
+                            $studyField = FieldOfStudy::create([
+                                'name' => $field->programme->description->pl,
+                                'usos_id' => $field->id
+                            ]);
+                        }
+
+                        FieldOfStudy::addUserToStudyField($user->id, $studyField->id);
+                    }
+                }
+                
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'User Created Successfully',
+                    'token' => $user->createToken("API TOKEN")->plainTextToken
+                ], 200);
+            }
+            
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -72,34 +111,35 @@ class AuthController extends Controller
      * @param Request $request
      * @return User
      */
-    public function loginUser(LoginPostRequest $request)
+    public function loginUser(Request $request)
     {
         try {
+            
+            $validateUser = Validator::make($request->all(),
+            [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
 
-            if (!Auth::attempt($request->only(['email', 'password']))) {
+            if($validateUser->fails()){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Email & Password does not match with our record.',
+                    'message' => 'validation error',
+                    'errors' => $validateUser->errors()
                 ], 401);
             }
 
             $user = User::where('email', $request->email)->first();
 
-            if ($user->email_verified_at)
-            {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'User Logged In Successfully',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken,
-                    'email_verified' => $user->email_verified_at
-                ], 200);
-            }
-            else
-            {
-                return response()->json([
-                    'message' => 'User is not verified',
-                ], 401);
-            }
+            
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'User Logged In Successfully',
+                'token' => $user->createToken("API TOKEN")->plainTextToken
+            ], 200);
+            
+           
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -108,10 +148,34 @@ class AuthController extends Controller
         }
     }
 
-    public function profile(Request $request)
+    public function profile()
     {
-        // return $request->user();
-        return new UserResource($request->user());
+        return User::where('id', Auth::user()->id)->with('studyFields')->first();
+    }
+
+    public function checkToken(Request $request)
+    {
+        $currentToken = $request->currentToken;
+        $currentToken = explode('|', $currentToken);
+
+        $tokenId = $currentToken[0];
+        $tokenObject = User::getTokenById($tokenId);
+        if (!empty($tokenObject)) 
+        {
+            $currentDate = date('Y-m-d H:i:s', time() - 3600);
+            if ($tokenObject->created_at < $currentDate) 
+            {
+                User::removeToken($tokenId);
+                UsosData::removeToken(Auth::user()->id);
+                return ['isExpired' => true];
+            }
+        }
+        else
+        {
+            return ['isExpired' => true];
+        }
+        
+
     }
 
     public function editProfile(EditProfileRequest $request)
@@ -121,6 +185,7 @@ class AuthController extends Controller
 
             $imgPath = null;
             $user = User::findOrFail(Auth::user()->id);
+            
             if(!empty($user->profile_image))
             {
                 $imgPath = $user->profile_image;

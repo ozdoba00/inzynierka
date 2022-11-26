@@ -12,7 +12,7 @@ class UsosController extends Controller
         $usosProvider = new UsosProvider;
 
         $usosProvider->setAuthorizationData('https://usosapps.prz.edu.pl/',  env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), 'http://localhost:8080/usos-submit');
-        $usosProvider->setScopes(array('studies'));
+        $usosProvider->setScopes(array('studies', 'email', 'other_emails', 'personal'));
         $requestTokens = $usosProvider->setRequestToken();
 
         $usosData = new UsosData();
@@ -49,16 +49,23 @@ class UsosController extends Controller
 
     public function accessToken(Request $request)
     {
-        $usosProvider = new UsosProvider;
-        $oauthToken = $request->oauth_token;
-        $usosData = UsosData::where('oauth_token', 'LIKE', '%'.$oauthToken.'%')->first();
-        $access_token = $usosProvider->getAccessToken('https://usosapps.prz.edu.pl/',env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), $usosData->oauth_token, $usosData->oauth_token_secret, $usosData->oauth_verifier);
+        try {
+
+            $usosProvider = new UsosProvider;
+            $oauthToken = $request->oauth_token;
+            $usosData = UsosData::where('oauth_token', 'LIKE', '%' . $oauthToken . '%')->first();
+            $access_token = $usosProvider->getAccessToken('https://usosapps.prz.edu.pl/', env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), $usosData->oauth_token, $usosData->oauth_token_secret, $usosData->oauth_verifier);
+
+            $usosDataUpdate = UsosData::find($usosData->id);
+
+            $usosDataUpdate = $usosDataUpdate->update([
+                'oauth_token' => $access_token['oauth_token'],
+                'oauth_token_secret' => $access_token['oauth_token_secret']
+            ]);
+
+        } catch (\Throwable $th) {
+            return $th;
+        }
         
-        $usosDataUpdate = UsosData::find($usosData->id);
-        
-        $usosDataUpdate = $usosDataUpdate->update([
-            'oauth_token' => $access_token['oauth_token'],
-            'oauth_token_secret' => $access_token['oauth_token_secret']
-        ]);
     }
 }

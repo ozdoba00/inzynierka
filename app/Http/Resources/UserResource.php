@@ -16,6 +16,7 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         // return parent::toArray($request);
+        return $request;
         return[
             "id"=> $this->id,
             "name"=> $this->name,
@@ -26,6 +27,7 @@ class UserResource extends JsonResource
             "last_name"=> $this->last_name,
             "profile_image"=> $this->profile_image ? Storage::url($this->profile_image) : $this->profile_image,
             "date_of_birth"=> $this->date_of_birth,
+            'study_fields' => $this->study_fields,
             "gender"=> $this->gender
         ];
 

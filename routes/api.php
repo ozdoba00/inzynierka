@@ -40,12 +40,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/ical-events/edit/{id}', [ICalController::class, 'update']);
     Route::delete('/ical-events/remove/{id}', [ICalController::class, 'destroy']);
     
+    Route::post('/auth/check-token', [AuthController::class, 'checkToken']);
 
 
 });
 
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
+
 Route::post('/calendar-save', [ICalController::class, 'saveCalendarEvents']);
 
 Route::get('/usos-data', [UsosController::class, 'index']);

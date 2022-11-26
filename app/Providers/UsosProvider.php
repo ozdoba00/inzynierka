@@ -68,6 +68,17 @@ class UsosProvider {
         return $access_token_info;
     }
 
+    public static function setApiAuthorization(string $oauthToken, string $oauthSecretToken)
+    {
+        $oauth = new \OAuth(env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
+
+        $oauth->disableSSLChecks();
+        $oauth->setToken($oauthToken,$oauthSecretToken);
+
+        return $oauth;
+
+    }
+
 
 
 }
