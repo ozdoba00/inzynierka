@@ -54,49 +54,51 @@ class AuthController extends Controller
             $usosApi = UsosProvider::setApiAuthorization($oauthData->oauth_token, $oauthData->oauth_token_secret);
             $usosData = new UsosData();
             $userData = $usosData->checkUserApiByEmail($usosApi, $email);
-    
+            $userGroups = $usosData->getUserGroups($usosApi);
             if($userData)
             {
-                $user = User::create([
-                    'email' => $userData['email'],
-                    'password' => Hash::make($request->password),
-                    'name' => $userData['first_name'],
-                    'last_name' => $userData['last_name'],
-                    'email_verified_at' => date('Y-m-d H:i:s'),
-                    'date_of_birth' => $userData['birth_date'],
-                    'gender' => $userData['sex']
-                ]);
+                // $user = User::create([
+                //     'email' => $userData['email'],
+                //     'password' => Hash::make($request->password),
+                //     'name' => $userData['first_name'],
+                //     'last_name' => $userData['last_name'],
+                //     'email_verified_at' => date('Y-m-d H:i:s'),
+                //     'date_of_birth' => $userData['birth_date'],
+                //     'gender' => $userData['sex']
+                // ]);
     
               
-                UsosDataUser::create([
-                    'user_id' => $user->id,
-                    'usos_data_id' => $oauthData->id
-                ]);
+                // UsosDataUser::create([
+                //     'user_id' => $user->id,
+                //     'usos_data_id' => $oauthData->id
+                // ]);
 
-                if($userData['student_programmes'])
+                // if($userData['student_programmes'])
+                // {
+                //     foreach ($userData['student_programmes'] as $field) 
+                //     {
+                //         $studyField = FieldOfStudy::where('usos_id', $field->id)->first();
+                //         if(empty($studyField))
+                //         {
+                //             $studyField = FieldOfStudy::create([
+                //                 'name' => $field->programme->description->pl,
+                //                 'usos_id' => $field->id
+                //             ]);
+                //         }
+
+                //         FieldOfStudy::addUserToStudyField($user->id, $studyField->id);
+                //     }
+                // }
+
+                if($userGroups)
                 {
-                    foreach ($userData['student_programmes'] as $field) 
-                    {
-                        $studyField = FieldOfStudy::where('usos_id', $field->id)->first();
-                        if(empty($studyField))
-                        {
-                            $studyField = FieldOfStudy::create([
-                                'name' => $field->programme->description->pl,
-                                'usos_id' => $field->id
-                            ]);
-                        }
-
-                        FieldOfStudy::addUserToStudyField($user->id, $studyField->id);
-                    }
+                    return ['a'=>$userGroups];
                 }
-                
 
-                return response()->json([
-                    'status' => true,
-                    'message' => 'User Created Successfully',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
+                die;
             }
+
+
             
         } catch (\Throwable $th) {
             return response()->json([

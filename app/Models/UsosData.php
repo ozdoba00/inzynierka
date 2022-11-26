@@ -34,6 +34,15 @@ class UsosData extends Model
         
     }
 
+    public function getUserGroups(\OAuth $usosApi): ? array
+    {
+        $url = $this->baseUrl . 'groups/user?fields=class_type';
+        $usosApi->fetch($url);
+        $response_info = json_decode($usosApi->getLastResponse());
+        
+        return (array)$response_info;
+    }
+
     public static function removeToken($userId)
     {
         $token = DB::table('usos_data_users')
