@@ -12,6 +12,7 @@ use App\Providers\UsosProvider;
 use App\Models\UsosData;
 use App\Models\UsosDataUser;
 use App\Models\FieldOfStudy;
+use App\Models\StudyGroup;
 
 use DateTime;
 use Illuminate\Support\Facades\Auth;
@@ -57,45 +58,73 @@ class AuthController extends Controller
             $userGroups = $usosData->getUserGroups($usosApi);
             if($userData)
             {
-                // $user = User::create([
-                //     'email' => $userData['email'],
-                //     'password' => Hash::make($request->password),
-                //     'name' => $userData['first_name'],
-                //     'last_name' => $userData['last_name'],
-                //     'email_verified_at' => date('Y-m-d H:i:s'),
-                //     'date_of_birth' => $userData['birth_date'],
-                //     'gender' => $userData['sex']
-                // ]);
+                $user = User::create([
+                    'email' => $userData['email'],
+                    'password' => Hash::make($request->password),
+                    'name' => $userData['first_name'],
+                    'last_name' => $userData['last_name'],
+                    'email_verified_at' => date('Y-m-d H:i:s'),
+                    'date_of_birth' => $userData['birth_date'],
+                    'gender' => $userData['sex']
+                ]);
     
               
-                // UsosDataUser::create([
-                //     'user_id' => $user->id,
-                //     'usos_data_id' => $oauthData->id
-                // ]);
+                UsosDataUser::create([
+                    'user_id' => $user->id,
+                    'usos_data_id' => $oauthData->id
+                ]);
 
-                // if($userData['student_programmes'])
-                // {
-                //     foreach ($userData['student_programmes'] as $field) 
-                //     {
-                //         $studyField = FieldOfStudy::where('usos_id', $field->id)->first();
-                //         if(empty($studyField))
-                //         {
-                //             $studyField = FieldOfStudy::create([
-                //                 'name' => $field->programme->description->pl,
-                //                 'usos_id' => $field->id
-                //             ]);
-                //         }
+                if($userData['student_programmes'])
+                {
+                    foreach ($userData['student_programmes'] as $field) 
+                    {
+                        $studyField = FieldOfStudy::where('usos_id', $field->id)->first();
+                        if(empty($studyField))
+                        {
+                            $studyField = FieldOfStudy::create([
+                                'name' => $field->programme->description->pl,
+                                'usos_id' => $field->id
+                            ]);
+                        }
 
-                //         FieldOfStudy::addUserToStudyField($user->id, $studyField->id);
-                //     }
-                // }
+                        FieldOfStudy::addUserToStudyField($user->id, $studyField->id);
+                    }
+                }
 
                 if($userGroups)
                 {
-                    return ['a'=>$userGroups];
+                    foreach ($userGroups['groups'] as $groups) 
+                    {
+                        foreach ($groups as  $group) {
+                            
+                            $studyGroup = StudyGroup::where('usos_id', $group->course_unit_id)->first();
+                            if(empty($studyGroup))
+                            {
+                                $groupClassType = $group->class_type->pl[0];
+                                
+                                if($group->class_type->pl[0] !== 'W' && $group->class_type->pl[0] !== 'L' && $group->class_type->pl[0] !== 'E' && $group->class_type->pl[0] !== 'P')
+                                {
+                                    $groupClassType = 'C';
+                                }
+                             
+                                $studyGroup = StudyGroup::create([
+                                    'usos_id' => $group->course_unit_id,
+                                    'name'=> $group->course_name->pl,
+                                    'type' => $groupClassType,
+                                    'term' => $group->term_id
+                                ]);
+                            }
+
+                            StudyGroup::saveUserToGroup($user->id, $studyGroup->id);
+                        }
+                    }
                 }
 
-                die;
+                return response()->json([
+                    'status' => true,
+                    'message' => 'User Created Successfully',
+                    'token' => $user->createToken("API TOKEN")->plainTextToken
+                ], 200);
             }
 
 
@@ -152,7 +181,7 @@ class AuthController extends Controller
 
     public function profile()
     {
-        return User::where('id', Auth::user()->id)->with('studyFields')->first();
+        return new UserResource(User::where('id', Auth::user()->id)->with('studyFields')->first());
     }
 
     public function checkToken(Request $request)

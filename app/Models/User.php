@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    protected $with = ['studyFields'];
     /**
      * The attributes that should be cast.
      *
@@ -64,6 +65,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany('App\Models\FieldOfStudy', 'users_fields_of_study', 'user_id', 'study_field_id');
     }
+    
+   
+    
 
     public static function getTokenById(int $tokenId)
     {

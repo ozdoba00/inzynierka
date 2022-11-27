@@ -8,6 +8,7 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\HomeInformationController;
 use App\Http\Controllers\ICalController;
 use App\Http\Controllers\UsosController;
+use App\Http\Controllers\AnnouncementsController;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -30,9 +31,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
+    Route::post('/offer/fav/{id}', [OfferController::class, 'setFavourite']);
     Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
 
     Route::get('/posts', [HomeInformationController::class, 'index']);
+
+    Route::get('/announcements', [AnnouncementsController::class, 'index']);
+    Route::post('/announcement/add', [AnnouncementsController::class, 'store']);
+    Route::delete('/announcement/{id}/remove', [AnnouncementsController::class, 'destroy']);
 
     Route::get("/ical-events", [ICalController::class, 'getEventsICalObject']);
     Route::post('/ical-events/add', [ICalController::class, 'store']);

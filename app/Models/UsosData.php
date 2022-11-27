@@ -36,7 +36,7 @@ class UsosData extends Model
 
     public function getUserGroups(\OAuth $usosApi): ? array
     {
-        $url = $this->baseUrl . 'groups/user?fields=class_type';
+        $url = $this->baseUrl . 'groups/user?fields=class_type|course_unit_id';
         $usosApi->fetch($url);
         $response_info = json_decode($usosApi->getLastResponse());
         

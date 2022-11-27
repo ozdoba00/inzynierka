@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\OfferRequest;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Offer;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 class OfferController extends Controller
 {
@@ -20,7 +22,11 @@ class OfferController extends Controller
 
         foreach ($offers as $key => $offerData) {
 
-            // return ['user'=> Auth::user()->id];
+            $offerData['user']['profile_image'] =  $offerData['user']['profile_image'] ? Storage::url( $offerData['user']['profile_image']) :  $offerData['user']['profile_image'];
+            if(Offer::checkOfferFavourites(Auth::user()->id, $offerData['id']))
+            {
+                $offerData['fav'] = true;
+            }
             if ($offerData['user']['id'] == Auth::user()->id) {
                 $offers[$key]['editable'] = true;
             } else {
@@ -58,6 +64,29 @@ class OfferController extends Controller
             'user_id' => auth()->id()
         ]);
         return ['offerData'=>$offerData];
+    }
+
+
+    public function setFavourite($id)
+    {
+
+        try {
+            $userId = Auth::user()->id;
+
+            $offerFav = Offer::checkOfferFavourites($userId, $id);
+
+            if (!empty($offerFav)) {
+                Offer::removeFavourite($offerFav->id);
+                return ['status' => true, 'removed' => true];
+            } else {
+                Offer::saveFavourite($userId, $id);
+                return ['status' => true, 'removed' => false];
+            }
+        } catch (\Throwable $th) {
+            return ['error' => $th];
+        }
+        
+
     }
 
     /**
