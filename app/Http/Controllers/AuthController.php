@@ -209,6 +209,7 @@ class AuthController extends Controller
 
     }
 
+
     public function editProfile(EditProfileRequest $request)
     {
         

@@ -5,10 +5,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\OfferController;
-use App\Http\Controllers\HomeInformationController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ICalController;
 use App\Http\Controllers\UsosController;
 use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\StudyGroupController;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -28,13 +29,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/profile/edit', [AuthController::class, 'editProfile']);
+    
 
     Route::get('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
     Route::post('/offer/fav/{id}', [OfferController::class, 'setFavourite']);
     Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
 
-    Route::get('/posts', [HomeInformationController::class, 'index']);
+    Route::get('/posts', [PostController::class, 'index']);
+    Route::post('/post/add', [PostController::class, 'store']);
 
     Route::get('/announcements', [AnnouncementsController::class, 'index']);
     Route::post('/announcement/add', [AnnouncementsController::class, 'store']);
@@ -47,6 +50,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::delete('/ical-events/remove/{id}', [ICalController::class, 'destroy']);
     
     Route::post('/auth/check-token', [AuthController::class, 'checkToken']);
+
+    Route::get('/study-groups', [StudyGroupController::class, 'index']);
 
 
 });

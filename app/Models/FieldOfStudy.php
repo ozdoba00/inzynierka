@@ -25,10 +25,7 @@ class FieldOfStudy extends Model
         ]);
     }
 
-    public function users()
-    {
-        return $this-> belongsToMany('App\Models\User');
-    }
+   
 
 
 }

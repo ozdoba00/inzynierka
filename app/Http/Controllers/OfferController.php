@@ -22,7 +22,7 @@ class OfferController extends Controller
 
         foreach ($offers as $key => $offerData) {
 
-            $offerData['user']['profile_image'] =  $offerData['user']['profile_image'] ? Storage::url( $offerData['user']['profile_image']) :  $offerData['user']['profile_image'];
+            // $offerData['user']['profile_image'] =  $offerData['user']['profile_image'] ? Storage::url( $offerData['user']['profile_image']) :  $offerData['user']['profile_image'];
             if(Offer::checkOfferFavourites(Auth::user()->id, $offerData['id']))
             {
                 $offerData['fav'] = true;

@@ -58,17 +58,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function post()
     {
-        return $this->hasOne('App\Models\HomeInformation');
+        return $this->hasOne('App\Models\Post');
     }
 
     public function studyFields()
     {
         return $this->belongsToMany('App\Models\FieldOfStudy', 'users_fields_of_study', 'user_id', 'study_field_id');
     }
+
     
    
-    
-
     public static function getTokenById(int $tokenId)
     {
         $token = DB::table('personal_access_tokens')
