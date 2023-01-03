@@ -6,7 +6,8 @@ use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\User;
+use App\Http\Resources\UserResource;
 
 class PostController extends Controller
 {
@@ -17,7 +18,14 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $currentUser = User::where('id', Auth::user()->id)->with('studyFields')->first();
+        foreach ($currentUser['studyFields'] as $studyField) 
+        {
+
+            $posts = Post::getPosts($studyField['id']);
+            
+        }
+        return $posts;
     }
 
     /**
@@ -43,9 +51,6 @@ class PostController extends Controller
         [
             'content' => 'required',
             'from' => 'required',
-            'to' => 'required',
-            'calendar' => 'required',
-            'type' => 'required'
         ]);  
 
 
@@ -57,20 +62,18 @@ class PostController extends Controller
         ], 401);
     }
 
-    $studyGroupId = null;
-    if($request->type == '2')
+    $to = null;
+    if($request->to)
     {
-        $studyGroupId = $request->studyGroup;
+        $to = $request->to;
     }
 
     Post::create([
         'user_id' => Auth::user()->id,
-        'study_group_id' => $studyGroupId,
         'content' => $request->content,
-        'type' => $request->type,
-        'calendar' => $request->calendar,
         'from' => $request->from,
-        'to' => $request->to
+        'to' => $to,
+        'study_field_id' => $request->selectedStudyField
     ]);
 
     return response()->json([

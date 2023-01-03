@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Offer;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+
 class OfferController extends Controller
 {
     /**
@@ -16,25 +18,26 @@ class OfferController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Offer $offer)
+    public function index(Offer $offer, Request $request)
     {
-        $offers = $offer->with('user')->orderBy('updated_at', 'DESC')->get();
+        if(!empty($request->filter))
+        {
+            $offers = $offer->with('user')->where('study_field_id', '=', $request->filter)->orderBy('updated_at', 'DESC')->get();
+        }
+        else
+        {
+            $offers = $offer->with('user')->orderBy('updated_at', 'DESC')->get();
+        }
 
         foreach ($offers as $key => $offerData) {
 
-            // $offerData['user']['profile_image'] =  $offerData['user']['profile_image'] ? Storage::url( $offerData['user']['profile_image']) :  $offerData['user']['profile_image'];
             if(Offer::checkOfferFavourites(Auth::user()->id, $offerData['id']))
             {
                 $offerData['fav'] = true;
             }
-            if ($offerData['user']['id'] == Auth::user()->id) {
-                $offers[$key]['editable'] = true;
-            } else {
-                $offers[$key]['editable'] = false;
-            }
-
+            $offers[$key]['editable'] = $offerData['user']['id'] == Auth::user()->id ? true : false;
+            
         }
-
         return ['offers'=>$offers];
     }
 
@@ -54,22 +57,31 @@ class OfferController extends Controller
      * @param  \Illuminate\Http\OfferRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(OfferRequest $request, Offer $offer)
+    public function store(OfferRequest $request)
     {
-        $offerData = $request->all();
-
-        Offer::create([
-            'content' => request('content'),
-            'price' => request('price'),
-            'user_id' => auth()->id()
-        ]);
-        return ['offerData'=>$offerData];
+        $selectedStudyField = null;
+        if($request->studyField)
+        {
+            $selectedStudyField = $request->studyField;
+        }
+        try {
+            Offer::create([
+                'content' => $request->content,
+                'price' => $request->price,
+                'user_id' => auth()->id(),
+                'show_type' => $request->filter,
+                'study_field_id' => $selectedStudyField
+            ]);
+            return response()->json(['message' => 'Offer has been added successfully'], 200); 
+        } catch (\Throwable $th) {
+            return $th;
+        }
+        
     }
 
 
     public function setFavourite($id)
     {
-
         try {
             $userId = Auth::user()->id;
 
@@ -85,8 +97,6 @@ class OfferController extends Controller
         } catch (\Throwable $th) {
             return ['error' => $th];
         }
-        
-
     }
 
     /**

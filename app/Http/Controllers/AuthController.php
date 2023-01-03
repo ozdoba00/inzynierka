@@ -15,6 +15,8 @@ use App\Models\FieldOfStudy;
 use App\Models\StudyGroup;
 
 use DateTime;
+use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -124,7 +126,7 @@ class AuthController extends Controller
                     'status' => true,
                     'message' => 'User Created Successfully',
                     'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
+                ], Response::HTTP_OK);
             }
 
 
@@ -133,7 +135,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -145,32 +147,28 @@ class AuthController extends Controller
     public function loginUser(Request $request)
     {
         try {
-            
-            $validateUser = Validator::make($request->all(),
-            [
-                'email' => 'required|email',
-                'password' => 'required'
-            ]);
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'email' => 'required|email',
+                    'password' => 'required'
+                ]
+            );
 
-            if($validateUser->fails()){
+            if ($validateUser->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'validation error',
                     'errors' => $validateUser->errors()
                 ], 401);
             }
-
             $user = User::where('email', $request->email)->first();
-
-            
-            
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'token' => $user->createToken("API TOKEN")->plainTextToken
             ], 200);
             
-           
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -181,7 +179,15 @@ class AuthController extends Controller
 
     public function profile()
     {
-        return new UserResource(User::where('id', Auth::user()->id)->with('studyFields')->first());
+        $userData = new UserResource(User::where('id', Auth::user()->id)->with('studyFields')->first());
+        $userFriends = User::getFriends($userData['studyFields'][0]['id'], $userData['id']);
+        return ['userData' => $userData, 'userFriends'=>$userFriends];
+    }
+
+    public function friendProfile($id)
+    {
+        $user = User::find($id);
+        return $user;
     }
 
     public function checkToken(Request $request)

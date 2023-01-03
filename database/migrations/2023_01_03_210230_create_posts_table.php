@@ -16,16 +16,13 @@ class CreatePostsTable extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("user_id");
-            $table->unsignedBigInteger("study_group_id")->nullable();
+            $table->unsignedBigInteger("study_field_id");
             $table->text('content');
-            $table->char('type', 1);
-            $table->char('calendar', 1);
-            $table->dateTime('from');
-            $table->dateTime('to');
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamp('from')->nullable();
+            $table->timestamp('to')->nullable();
+            $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('study_group_id')->references('id')->on('study_groups')->onDelete('cascade');
+            $table->foreign('study_field_id')->references('id')->on('fields_of_study')->onDelete('cascade');
         });
     }
 

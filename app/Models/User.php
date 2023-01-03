@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -47,7 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'date_of_birth' => 'datetime'
+        'date_of_birth' => 'datetime:m-d-Y'
     ];
     
 
@@ -65,8 +64,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany('App\Models\FieldOfStudy', 'users_fields_of_study', 'user_id', 'study_field_id');
     }
-
-    
    
     public static function getTokenById(int $tokenId)
     {
@@ -82,5 +79,15 @@ class User extends Authenticatable implements MustVerifyEmail
         DB::table('personal_access_tokens')
         ->where('id', $tokenId)
         ->delete();
+    }
+
+    public static function getFriends(int $fieldId, $userId)
+    {
+        $events = DB::table('users_fields_of_study')
+            ->join('users', 'users_fields_of_study.user_id', '=', 'users.id')
+            ->select(['users.name', 'users.last_name', 'users.id', 'users.profile_image'])
+            ->where([['users_fields_of_study.study_field_id', '=',$fieldId], ['users_fields_of_study.user_id', '!=',$userId]])
+            ->get();
+        return $events;
     }
 }

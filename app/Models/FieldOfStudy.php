@@ -16,6 +16,15 @@ class FieldOfStudy extends Model
     ];
 
 
+    public static function getStudyFieldsByUser($userId)
+    {
+        return DB::table('fields_of_study')
+        ->join('users_fields_of_study', 'fields_of_study.id', '=', 'users_fields_of_study.study_field_id')
+        ->select('fields_of_study.*')
+        ->where('users_fields_of_study.user_id', '=', $userId)
+        ->get();
+    }
+
     public static function addUserToStudyField($userId, $studyFieldId)
     {
         DB::table('users_fields_of_study')

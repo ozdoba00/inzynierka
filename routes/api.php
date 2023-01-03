@@ -10,8 +10,13 @@ use App\Http\Controllers\ICalController;
 use App\Http\Controllers\UsosController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\StudyGroupController;
+use App\Http\Controllers\StudyFieldsController;
+use App\Http\Controllers\MessageController;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\Mime\MessageConverter;
+use Symfony\Component\Translation\MessageCatalogue;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,7 +36,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/profile/edit', [AuthController::class, 'editProfile']);
     
 
-    Route::get('/offers', [OfferController::class, 'index']);
+    Route::post('/offers', [OfferController::class, 'index']);
     Route::post('/offers/add', [OfferController::class, 'store']);
     Route::post('/offer/fav/{id}', [OfferController::class, 'setFavourite']);
     Route::delete('/offers/{id}/remove', [OfferController::class, 'destroy']);
@@ -52,6 +57,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/auth/check-token', [AuthController::class, 'checkToken']);
 
     Route::get('/study-groups', [StudyGroupController::class, 'index']);
+
+    Route::get('/profile/{id}', [AuthController::class, 'friendProfile']);
+
+    Route::get('/study-fields', [StudyFieldsController::class, 'index']);
+
+    Route::get('/messages', [MessageController::class, 'index']);
 
 
 });

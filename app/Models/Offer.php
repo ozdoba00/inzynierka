@@ -11,7 +11,7 @@ class Offer extends Model
 
 
     protected $fillable = [
-        'content', 'price', 'user_id'
+        'content', 'price', 'user_id', 'show_type', 'study_field_id'
     ];
 
     public function user()

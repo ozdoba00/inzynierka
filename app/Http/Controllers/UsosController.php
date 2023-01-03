@@ -10,7 +10,6 @@ class UsosController extends Controller
     public function index()
     {
         $usosProvider = new UsosProvider;
-
         $usosProvider->setAuthorizationData('https://usosapps.prz.edu.pl/',  env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), 'http://localhost:8080/usos-submit');
         $usosProvider->setScopes(array('studies', 'email', 'other_emails', 'personal'));
         $requestTokens = $usosProvider->setRequestToken();
@@ -24,10 +23,8 @@ class UsosController extends Controller
         return ['url'=>$usosProvider->getAuthorizeUrl($requestTokens['oauth_token'], $requestTokens['oauth_token_secret'])];
     }
 
-
     public function authorization(Request $request)
     {
-
         try {
             $oauthToken = $request->oauth_token;
             $oauthVerifier = $request->oauth_verifier;
@@ -44,9 +41,7 @@ class UsosController extends Controller
         } catch (\Throwable $th) {
             return ['error' => $th];
         }
-
     }
-
     public function accessToken(Request $request)
     {
         try {
@@ -55,9 +50,7 @@ class UsosController extends Controller
             $oauthToken = $request->oauth_token;
             $usosData = UsosData::where('oauth_token', 'LIKE', '%' . $oauthToken . '%')->first();
             $access_token = $usosProvider->getAccessToken('https://usosapps.prz.edu.pl/', env('USOS_API_KEY'), env('USOS_API_KEY_SECRET'), $usosData->oauth_token, $usosData->oauth_token_secret, $usosData->oauth_verifier);
-
             $usosDataUpdate = UsosData::find($usosData->id);
-
             $usosDataUpdate = $usosDataUpdate->update([
                 'oauth_token' => $access_token['oauth_token'],
                 'oauth_token_secret' => $access_token['oauth_token_secret']
@@ -66,6 +59,5 @@ class UsosController extends Controller
         } catch (\Throwable $th) {
             return $th;
         }
-        
     }
 }
