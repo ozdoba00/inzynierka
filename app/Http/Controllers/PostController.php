@@ -21,9 +21,7 @@ class PostController extends Controller
         $currentUser = User::where('id', Auth::user()->id)->with('studyFields')->first();
         foreach ($currentUser['studyFields'] as $studyField) 
         {
-
             $posts = Post::getPosts($studyField['id']);
-            
         }
         return $posts;
     }
