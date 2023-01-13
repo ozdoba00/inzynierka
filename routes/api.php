@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/study-fields', [StudyFieldsController::class, 'index']);
 
     Route::get('/messages', [MessageController::class, 'index']);
+    Route::post('/message/add', [MessageController::class, 'store']);
 
 
 });

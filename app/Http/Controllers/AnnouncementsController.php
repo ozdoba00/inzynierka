@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Offer;
 use App\Models\Announcement;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 class AnnouncementsController extends Controller
@@ -17,7 +18,7 @@ class AnnouncementsController extends Controller
      */
     public function index()
     {
-        $announcements = Announcement::where('recipient_id', Auth::user()->id)->with(['user', 'offer'])->get();
+        $announcements = Announcement::where('recipient_id', Auth::user()->id)->with(['user', 'offer', 'message'])->get();
 
         foreach ($announcements as $announcement) {
             $announcement['user']['profile_image'] =  $announcement['user']['profile_image'] ? Storage::url( $announcement['user']['profile_image']) :  $announcement['user']['profile_image'];
@@ -69,6 +70,19 @@ class AnnouncementsController extends Controller
                 return ['status' => true, 'message' => 'Announcement has been sent'];
 
             }
+        }
+        elseif($request->type === 'M')
+        {
+            
+            Announcement::create([
+                'recipient_id' => $request->recipientId,
+                'sender_id' => Auth::user()->id,
+                'message_id' => $request->messageId,
+                'type' => 'M'
+            ]);
+
+            return ['status' => true, 'message' => 'Announcement has been sent'];
+
         }
        
     }

@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\DB;
 class Message extends Model
 {
     use HasFactory;
-
+    public $timestamps = false;
     protected $fillable = [
-        'content',  'sender_id', 'recipient_id'
+        'content',  'sender_id', 'recipient_id', 'created_at'
     ];
+
 
     public static function getMessages($userId)
     {
@@ -19,6 +20,7 @@ class Message extends Model
         ->join('users', 'messages.sender_id', '=', 'users.id')
         ->select('messages.*', 'users.name', 'users.last_name', 'users.profile_image')
         ->where('messages.recipient_id', $userId)
+        ->orWhere('messages.sender_id', $userId)
         ->get();
     }
 }

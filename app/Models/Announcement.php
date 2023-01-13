@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 class Announcement extends Model
 {
     use HasFactory;
@@ -13,6 +13,7 @@ class Announcement extends Model
         'recipient_id',
         'sender_id',
         'offer_id',
+        'message_id',
         'type'
     ];
 
@@ -28,4 +29,11 @@ class Announcement extends Model
     {
         return $this-> belongsTo('App\Models\Offer', 'offer_id');
     }
+
+    public function message()
+    {
+        return $this-> belongsTo('App\Models\Message', 'message_id');
+
+    }
+
 }

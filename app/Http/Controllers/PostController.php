@@ -44,40 +44,42 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-       
-        $validatePost = Validator::make($request->all(),
-        [
-            'content' => 'required',
-            'from' => 'required',
-        ]);  
 
+        $validatePost = Validator::make(
+            $request->all(),
+            [
+                'content' => 'required',
+                'from' => 'required',
+            ]
+        );
 
-    if($validatePost->fails()){
+        if ($validatePost->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'validation error',
+                'errors' => $validatePost->errors()
+            ], 401);
+        }
+
+        $to = null;
+
+        if ($request->to) 
+        {
+            $to = $request->to;
+        }
+
+        Post::create([
+            'user_id' => Auth::user()->id,
+            'content' => $request->content,
+            'from' => $request->from,
+            'to' => $to,
+            'study_field_id' => $request->selectedStudyField
+        ]);
+
         return response()->json([
-            'status' => false,
-            'message' => 'validation error',
-            'errors' => $validatePost->errors()
-        ], 401);
-    }
-
-    $to = null;
-    if($request->to)
-    {
-        $to = $request->to;
-    }
-
-    Post::create([
-        'user_id' => Auth::user()->id,
-        'content' => $request->content,
-        'from' => $request->from,
-        'to' => $to,
-        'study_field_id' => $request->selectedStudyField
-    ]);
-
-    return response()->json([
-    'status'=>true,
-    'message'=>'ok'
-]);
+            'status' => true,
+            'message' => 'ok'
+        ]);
     }
 
     /**
